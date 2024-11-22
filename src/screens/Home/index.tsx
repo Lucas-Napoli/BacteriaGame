@@ -1,13 +1,24 @@
-import { ImageBackground, Text } from "react-native";
-
+import React, { useState } from "react";
+import { View, ImageBackground } from "react-native";
+import { Game } from "./Game";
+import { Start } from "../Home/Game/Start";
 import BACKGROUND from "../../assets/images/backgroundAlto.jpg";
 import { styles } from "./styles";
-import { Game } from "./Game/index";
 
 const Home = () => {
+  const [isGameStarted, setIsGameStarted] = useState(false);
+
+  const handleStartGame = () => {
+    setIsGameStarted(true);
+  };
+
   return (
     <ImageBackground source={BACKGROUND} style={styles.container}>
-      <Game />
+      {!isGameStarted ? (
+        <Start handleOnStartGame={handleStartGame} />
+      ) : (
+        <Game />
+      )}
     </ImageBackground>
   );
 };

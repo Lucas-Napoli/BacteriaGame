@@ -1,15 +1,26 @@
-import React from "react";
-import { View, Text, Button, StyleSheet } from "react-native";
+import React, { useEffect } from "react";
+import { View, Image, StyleSheet } from "react-native";
 
-type GameOverProps = {
+// Importe a imagem "Game Over"
+import GAME_OVER from "../../../../assets/images/game-over.png";
+
+interface GameOverProps {
   handleBackToStart: () => void;
-};
+}
 
 const GameOver: React.FC<GameOverProps> = ({ handleBackToStart }) => {
+  useEffect(() => {
+    // Redireciona para a tela inicial após 3 segundos
+    const timer = setTimeout(() => {
+      handleBackToStart();
+    }, 3000);
+
+    return () => clearTimeout(timer); // Limpa o timer ao desmontar o componente
+  }, []);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Game Over!</Text>
-      <Button title="Back to Start" onPress={handleBackToStart} />
+      <Image source={GAME_OVER} style={styles.logoStyle} />
     </View>
   );
 };
@@ -18,14 +29,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "black",
+    alignItems: "center", // Fundo preto para destacar o texto/imagem
   },
-  text: {
-    fontSize: 30,
-    color: "white",
-    marginBottom: 20,
+  logoStyle: {
+    width: 300,
+    height: 150,
+    resizeMode: "contain", // Ajusta a imagem proporcionalmente
   },
 });
 
-export { GameOver };
+export {GameOver};

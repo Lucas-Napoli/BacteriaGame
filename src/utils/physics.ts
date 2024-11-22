@@ -5,8 +5,14 @@ import { Dimensions } from "react-native";
 const windowHeight = Dimensions.get("window").height;
 const windowWidth = Dimensions.get("window").width;
 
-export const Physics = (entities: { [x: string]: any; Physics?: any; Bacteria?: any; }, { touches, time, dispatch }: any) => {
+export const Physics = (entities: any, { touches, time, dispatch, paused }: any) => {
   const engine = entities.Physics.engine;
+
+  if (paused) {
+    return entities; // Se pausado, não faz nada
+  }
+
+  const CELL_SPACING_Y = 200;
 
   // Atualiza o motor de física
   Matter.Engine.update(engine, Math.min(time.delta, 16.667));
@@ -26,45 +32,43 @@ export const Physics = (entities: { [x: string]: any; Physics?: any; Bacteria?: 
     if (key.startsWith("Cell")) {
       Matter.Body.translate(entities[key].body, { x: -3, y: 0 });
 
+      const cellIndex = parseInt(key.replace("Cell", ""), 10);
+
       // Verifica se a célula saiu da tela
       if (entities[key].body.bounds.max.x <= 0) {
-        const newPos = getCellPositions(); // Gera uma nova posição
+        const newPos = {
+          x: windowWidth + 300 + Math.random() * 200, // Posição no eixo X
+          y: (cellIndex * CELL_SPACING_Y) % (windowHeight - 100), // Posição espaçada no eixo Y
+        };
         Matter.Body.setPosition(entities[key].body, newPos);
       }
     }
   });
 
-  // Listener de colisões
-  Matter.Events.on(engine, "collisionStart", (event: { pairs: any[]; }) => {
-    event.pairs.forEach((pair: { bodyA: any; bodyB: any; }) => {
-      const { bodyA, bodyB } = pair;
+  if (!engine.collisionListenerRegistered) {
+    Matter.Events.on(engine, "collisionStart", (event: { pairs: any[]; }) => {
+      event.pairs.forEach((pair: { bodyA: any; bodyB: any; }) => {
+        const { bodyA, bodyB } = pair;
 
-      // Verifica colisão entre a bactéria e uma célula
-      if (
-        (bodyA.label === "Bacteria" && bodyB.label?.startsWith("Cell")) ||
-        (bodyB.label === "Bacteria" && bodyA.label?.startsWith("Cell"))
-      ) {
-        const collidedCell = bodyA.label.startsWith("Cell") ? bodyA : bodyB;
-
-        // Dispara evento para abrir o modal com a pergunta
-        dispatch({
-          type: "open_modal",
-          question: `Pergunta relacionada à célula ${collidedCell.label}`,
-          options: ["Opção A", "Opção B", "Opção C", "Opção D"],
-          correctAnswer: 1, // Índice da resposta correta
-          onAnswer: (isCorrect: any) => {
-            if (!isCorrect) {
-              dispatch({ type: "game_over" }); // Game Over em caso de resposta errada
-            }
-          },
-        });
-
-        // Remove a célula do mundo após a colisão
-        Matter.World.remove(engine.world, collidedCell);
-        delete entities[collidedCell.label];
-      }
+        // Verifica qual corpo é a célula
+        if (
+          (bodyA.label === "Bacteria" && bodyB.label?.startsWith("Cell")) ||
+          (bodyB.label === "Bacteria" && bodyA.label?.startsWith("Cell"))
+        ) {
+          console.log("Colisão detectada! Abrindo modal...");
+          dispatch({
+            type: "open_modal",
+          }); // Dispara o evento para abrir o modal
+        }
+      });
     });
-  });
+
+
+    engine.collisionListenerRegistered = true;
+  }
+
+  
 
   return entities;
-};
+
+}

@@ -1,4 +1,4 @@
-import { Image } from "react-native";
+import { Animated, Image } from "react-native";
 import Matter from "matter-js";
 
 import CELULA1 from "../../assets/images/celula1.png";
@@ -8,8 +8,10 @@ import CELULA4 from "../../assets/images/celula4.png";
 import CELULA5 from "../../assets/images/celula5.png";
 
 import { styles } from "./styles";
+import { useRef } from "react";
 
 const Celula = (props: {
+  
   body: {
     bounds: {
       max: { x: number; y: number };
@@ -20,6 +22,9 @@ const Celula = (props: {
   cellType: number;
   color: string; // Adicionei a propriedade color nas props
 }) => {
+
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
   const widthBody = props.body.bounds.max.x - props.body.bounds.min.x;
   const heightBody = props.body.bounds.max.y - props.body.bounds.min.y;
 
