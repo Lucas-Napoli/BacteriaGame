@@ -4,6 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StyleSheet } from "react-native";
 
 import { Home } from "../src/screens/Home";
+import React from "react";
 
 export default function App() {
   const SplashScreenHide = useCallback(async () => {

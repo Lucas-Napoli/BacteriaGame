@@ -9,6 +9,7 @@ import CELULA5 from "../../assets/images/celula5.png";
 
 import { styles } from "./styles";
 import { useRef } from "react";
+import React from "react";
 
 const Celula = (props: {
   

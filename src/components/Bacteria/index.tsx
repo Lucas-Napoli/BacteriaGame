@@ -5,6 +5,7 @@ import BACTERIA from "../../assets/images/bacteria.png";
 
 import { styles } from "./styles";
 import { useEffect, useRef } from "react";
+import React from "react";
 
 const Bacteria = (props: { body: { bounds: { max: { x: number; y: number; }; min: { x: number; y: number; }; }; position: { x: number; y: number; }; }; color: any; }) => {
 

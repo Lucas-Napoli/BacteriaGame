@@ -1,6 +1,7 @@
 import { View, TouchableWithoutFeedback, Animated, Image } from "react-native";
 import { styles } from "./styles";
 import { useEffect, useRef } from "react";
+import React from "react";
 
 interface StartProps {
   handleOnStartGame: () => void;
