@@ -1,34 +1,101 @@
-import { useState } from "react";
-import { Start } from "./Start";
+import React, { useRef, useState } from "react";
+import { View, Alert } from "react-native";
 import { GameEngine } from "react-native-game-engine";
-
 import entities from "../../../entities";
+import { Physics } from "../../../utils/physics";
+import QuestionModal from "../../../components/Modal";
+import { Start } from "./Start/index"
+import { GameOver } from "./GameOver";
 import { styles } from "./styles";
-import { Physics } from "@/src/utils/physics";
+
+type QuestionType = {
+  question: string;
+  options: string[];
+  correctAnswer: number;
+};
 
 const Game = () => {
-  const [running, setIsRunning] = useState(false); // Controla se o jogo está rodando
-  const [gameEntities, setGameEntities] = useState(entities()); // Estado para as entidades do jogo
+  const [running, setIsRunning] = useState(false);
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState<QuestionType | null>(null);
 
-  const handleOnStartGame = () => {
-    setIsRunning(false); // Inicia o jogo
+  const gameEngineRef = useRef<GameEngine | null>(null); // Tipo ajustado para o GameEngine
+
+  const handleBackToStart = () => {
+    setIsRunning(false);
+    setIsGameOver(false);
   };
 
-  const handleOnEndGame = () => {
-    setIsRunning(false); // Para o jogo
-    setGameEntities(entities()); // Redefine as entidades
+  const handleOnStart = () => {
+    setIsRunning(true);
+    setIsGameOver(false);
   };
 
-  // return <Start handleOnStartGame={handleOnStartGame} />;
+  const handleOnGameOver = () => {
+    setIsRunning(false);
+    setIsGameOver(true);
+  };
+
+  const handleOnEvent = (e: { type: string; question?: string; options?: string[]; correctAnswer?: number }) => {
+    switch (e.type) {
+      case "game_over":
+        handleOnGameOver();
+        break;
+
+      case "open_modal":
+        setCurrentQuestion({
+          question: e.question!,
+          options: e.options!,
+          correctAnswer: e.correctAnswer!,
+        });
+        setModalVisible(true);
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  const handleAnswer = (isCorrect: boolean) => {
+    setModalVisible(false);
+    if (isCorrect) {
+      Alert.alert("Resposta Correta!", "Continue jogando!");
+    } else {
+      handleOnGameOver();
+    }
+  };
+
+  if (!running && !isGameOver) {
+    return <Start handleOnStartGame={handleOnStart} />;
+  }
+
+  if (!running && isGameOver) {
+    return <GameOver handleBackToStart={handleBackToStart} />;
+  }
 
   return (
-    <GameEngine
-      systems={[Physics]}
-      running={running}
-      entities={gameEntities} // Usa o estado para as entidades
-      style={styles.engineContainer}
-    />
+    <View style={{ flex: 1 }}>
+      <GameEngine
+        ref={gameEngineRef} // Corrigido para o tipo adequado
+        systems={[Physics]}
+        running={running}
+        entities={entities()}
+        onEvent={handleOnEvent}
+        style={styles.engineContainer}
+      />
+
+      {modalVisible && currentQuestion && (
+        <QuestionModal
+          visible={modalVisible}
+          question={currentQuestion.question}
+          options={currentQuestion.options}
+          correctAnswer={currentQuestion.correctAnswer}
+          onAnswer={handleAnswer}
+        />
+      )}
+    </View>
   );
 };
 
-export { Game };
+export { Game }

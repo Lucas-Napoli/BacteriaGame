@@ -36,7 +36,10 @@ export default (world: any, color: any, pos: { x: any; y: any; }, size: { width:
     pos.y,
     size.width,
     size.height,
-    { label: "bacteria" }
+    { label: "bacteria",
+      isStatic: false,
+      isSensor: false,
+     }
   );
 
   Matter.World.add(world, [initialBacteria]);

@@ -66,7 +66,11 @@ export default (
     pos.y,
     size.width,
     size.height,
-    { label, isStatic: true }
+    {
+      isStatic: true, // O corpo é estático, não se move com gravidade
+      isSensor: true, // Define como sensor para evitar bloqueios
+      label, // Identificador do corpo
+    }
   );
 
   Matter.World.add(world, [initialCelula]);
